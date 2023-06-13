@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.licenta.controllers.LoginController">
+   <left>
+      <AnchorPane prefHeight="500.0" prefWidth="350.0" style="-fx-background-color: #8141FF;" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="163.0" fitWidth="184.0" layoutX="94.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../hack.png" />
+               </image>
+            </ImageView>
+            <Text layoutX="27.0" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Pentesting Platform" textAlignment="CENTER">
+               <font>
+                  <Font size="30.0" />
+               </font>
+            </Text>
+         </children></AnchorPane>
+   </left>
+   <center>
+
+   </center>
+   <right>
+      <Pane prefHeight="550.0" prefWidth="455.0" BorderPane.alignment="CENTER">
+         <children>
+            <AnchorPane fx:id="loginPane" prefHeight="550.0" prefWidth="449.0" visible="false">
+               <FontAwesomeIconView glyphName="USER" layoutX="135.0" layoutY="208.0" size="25" text="" />
+               <FontAwesomeIconView glyphName="KEY" layoutX="132.0" layoutY="256.0" size="25" />
+               <FontAwesomeIconView fill="#8141ff" glyphName="DESKTOP" layoutX="223.0" layoutY="76.0" size="50" wrappingWidth="54.25" />
+               <Text layoutX="179.0" layoutY="110.0" strokeType="OUTSIDE" strokeWidth="0.0" text="User Login" textAlignment="CENTER" wrappingWidth="142.01821899414062">
+                  <font>
+                     <Font size="20.0" />
+                  </font>
+               </Text>
+               <JFXTextField fx:id="loginUsername" layoutX="163.0" layoutY="185.0" prefWidth="175.0" promptText="Username" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXTextField fx:id="loginPasswordText" layoutX="163.0" layoutY="235.0" prefWidth="175.0" promptText="Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXPasswordField fx:id="loginPasswordField" layoutX="163.0" layoutY="235.0" prefWidth="175.0" promptText="Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <CheckBox fx:id="loginPasswordCheckbox" layoutX="189.0" layoutY="362.0" mnemonicParsing="false" text="Show Password" />
+               <JFXButton fx:id="loginButton" layoutX="202.0" layoutY="402.0" onAction="#pressLogin" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #8141FF;" text="Login" />
+               <JFXButton fx:id="registerButton" layoutX="202.0" layoutY="449.0" onAction="#pressRegister" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #8141FF;" text="Register" />
+               <Hyperlink layoutX="307.0" layoutY="514.0" text="Forgot password?" />
+               <Button layoutX="411.0" mnemonicParsing="false" onAction="#exit" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+                  <graphic>
+                     <FontAwesomeIconView fill="#8141ff" glyphName="CLOSE" size="23" />
+                  </graphic>
+               </Button>
+               <Button layoutX="371.0" mnemonicParsing="false" onAction="#minimize" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+                  <graphic>
+                     <FontAwesomeIconView fill="#8141ff" glyphName="WINDOW_MINIMIZE" size="20" />
+                  </graphic>
+               </Button>
+            </AnchorPane>
+            <AnchorPane fx:id="registerPane" prefHeight="550.0" prefWidth="449.0">
+               <FontAwesomeIconView glyphName="USER" layoutX="135.0" layoutY="208.0" size="25" text="" />
+               <FontAwesomeIconView glyphName="ENVELOPE" layoutX="132.0" layoutY="156.0" size="25" />
+               <FontAwesomeIconView glyphName="KEY" layoutX="132.0" layoutY="256.0" size="25" />
+               <FontAwesomeIconView glyphName="LOCK" layoutX="136.0" layoutY="306.0" size="25" />
+               <FontAwesomeIconView fill="#8141ff" glyphName="DESKTOP" layoutX="223.0" layoutY="76.0" size="50" wrappingWidth="54.25" />
+               <Text layoutX="179.0" layoutY="110.0" strokeType="OUTSIDE" strokeWidth="0.0" text="User Register" textAlignment="CENTER" wrappingWidth="142.01821899414062">
+                  <font>
+                     <Font size="20.0" />
+                  </font>
+               </Text>
+               <JFXTextField fx:id="registerEmail" layoutX="163.0" layoutY="135.0" prefWidth="175.0" promptText="Email" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXTextField fx:id="registerUsername" layoutX="163.0" layoutY="185.0" prefWidth="175.0" promptText="Username" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXTextField fx:id="registerPasswordText" layoutX="163.0" layoutY="235.0" prefWidth="175.0" promptText="Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXTextField fx:id="registerConfirmPasswordText" layoutX="163.0" layoutY="285.0" prefWidth="175.0" promptText="Confirm Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXPasswordField fx:id="registerPasswordField" layoutX="163.0" layoutY="235.0" prefWidth="175.0" promptText="Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <JFXPasswordField fx:id="registerConfirmPasswordField" layoutX="163.0" layoutY="285.0" prefWidth="175.0" promptText="Confirm Password" style="-fx-background-color: transparent; -fx-border-color: #8141FF; -fx-border-width: 0px 0px 2px 2px;" />
+               <ComboBox fx:id="roleComboBox" layoutX="176.0" layoutY="329.0" prefWidth="150.0" promptText="Role">
+                  <items>
+                     <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Client" />
+                        <String fx:value="Tester" />
+                     </FXCollections>
+                  </items>
+               </ComboBox>
+               <CheckBox fx:id="registerPasswordCheckbox" layoutX="189.0" layoutY="362.0" mnemonicParsing="false" text="Show Password" />
+               <JFXButton fx:id="confirmRegisterButton" layoutX="202.0" layoutY="402.0" onAction="#pressConfirmRegister" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #8141FF;" text="Register" />
+               <JFXButton fx:id="backButton" layoutX="202.0" layoutY="449.0" onAction="#pressBack" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #8141FF;" text="Back" />
+               <Hyperlink layoutX="307.0" layoutY="514.0" text="Forgot password?" />
+               <Button layoutX="411.0" mnemonicParsing="false" onAction="#exit" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+                  <graphic>
+                     <FontAwesomeIconView fill="#8141ff" glyphName="CLOSE" size="23" />
+                  </graphic>
+               </Button>
+               <Button layoutX="371.0" mnemonicParsing="false" onAction="#minimize" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+                  <graphic>
+                     <FontAwesomeIconView fill="#8141ff" glyphName="WINDOW_MINIMIZE" size="20" />
+                  </graphic>
+               </Button>
+            </AnchorPane>
+         </children>
+      </Pane>
+   </right>
+</BorderPane>

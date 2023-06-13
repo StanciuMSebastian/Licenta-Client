@@ -1,0 +1,15 @@
+.custom-list-view .list-cell:filled:selected {
+    -fx-background-color: #8141ff;
+    -fx-text-fill: black;
+}
+
+.custom-list-view .list-cell:filled:selected .label {
+    -fx-background-color: transparent; /* Custom button background color */
+}
+
+.custom-list-view .list-cell:filled:selected .button {
+    -fx-background-color: transparent; /* Custom button background color */
+    -fx-text-fill: black;
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+}

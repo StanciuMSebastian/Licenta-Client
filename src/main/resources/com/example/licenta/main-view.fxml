@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="547.0" prefWidth="962.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.licenta.controllers.MainController">
+   <left>
+       <AnchorPane prefHeight="500.0" prefWidth="300.0" style="-fx-background-color: #8141FF;" BorderPane.alignment="CENTER">
+           <ImageView fitHeight="163.0" fitWidth="184.0" layoutX="69.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@../../../hack.png" />
+           </ImageView>
+           <Text fx:id="welcomeText" layoutY="267.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Greetings" textAlignment="CENTER" wrappingWidth="299.279296875">
+               <font>
+                   <Font size="30.0" />
+               </font>
+           </Text>
+           <Label contentDisplay="RIGHT" layoutX="14.0" layoutY="414.0" prefHeight="34.0" prefWidth="180.0" style="-fx-background-color: transparent;" text="Add new address">
+              <font>
+                  <Font size="20.0" />
+              </font>
+           </Label>
+           <Button fx:id="newAddressButton" contentDisplay="RIGHT" layoutX="217.0" layoutY="413.0" mnemonicParsing="false" onAction="#clickAddAddress" prefHeight="36.0" prefWidth="49.0">
+              <graphic>
+                  <FontAwesomeIconView fill="GREEN" glyphName="PLUS" selectionFill="GREEN" size="20" />
+              </graphic>
+           </Button>
+           <Button layoutX="117.0" layoutY="477.0" mnemonicParsing="false" onAction="#logOut" style="-fx-background-color: white;" text="Log out" />
+         <Button fx:id="refreshButton" layoutX="224.0" layoutY="475.0" mnemonicParsing="false" onAction="#updateAddressList">
+            <graphic>
+               <FontAwesomeIconView glyphName="REFRESH" size="20" />
+            </graphic>
+         </Button>
+       </AnchorPane>
+   </left>
+   <right>
+      <Pane prefHeight="547.0" prefWidth="663.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label layoutX="267.0" layoutY="17.0" text="Your Addresses">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Button layoutX="581.0" layoutY="-1.0" mnemonicParsing="false" onAction="#minimize" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+               <graphic>
+                  <FontAwesomeIconView fill="#8141ff" glyphName="WINDOW_MINIMIZE" size="20" wrappingWidth="15.714285850524902" />
+               </graphic>
+            </Button>
+            <Button layoutX="622.0" layoutY="-1.0" mnemonicParsing="false" onAction="#exit" prefHeight="30.0" prefWidth="40.0" style="-fx-background-color: transparent;">
+               <graphic>
+                  <FontAwesomeIconView fill="#8141ff" glyphName="CLOSE" size="23" />
+               </graphic>
+            </Button>
+            <AnchorPane layoutX="32.0" layoutY="64.0" prefHeight="412.0" prefWidth="599.0">
+               <children>
+                  <ListView fx:id="addressListView" prefHeight="420.0" prefWidth="599.0" styleClass="custom-list-view" />
+               </children>
+            </AnchorPane>
+         </children></Pane>
+   </right>
+</BorderPane>
