@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<DialogPane prefHeight="150.0" prefWidth="412.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.licenta.controllers.UserInfoController">
+   <content>
+      <AnchorPane prefHeight="164.0" prefWidth="412.0">
+         <children>
+            <Label fx:id="userInfoLabel" alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="55.0" prefWidth="376.0" text="Info" wrapText="true" />
+         </children>
+      </AnchorPane>
+   </content>
+   <buttonTypes>
+      <ButtonType fx:constant="CLOSE" />
+   </buttonTypes>
+</DialogPane>

@@ -1,9 +1,14 @@
 package com.example.licenta;
 
+import com.example.licenta.controllers.AddAddressInterface;
+import com.example.licenta.controllers.UserInfoController;
 import com.jfoenix.controls.JFXButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -16,13 +21,14 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Address {
     private String ip, name, scanType, testerUsername, clientUsername;
     private int addressId;
     private boolean areScansComplete, isAutomaticScanComplete, isManualScanComplete, isExtended;
 
-    private JFXButton deleteButton, downloadButton, uploadButton;
+    private JFXButton deleteButton, downloadButton, uploadButton, userInfoButton, startChatButton;
     private Label addressName, addressFeaturesLabel;
     private VBox vBox;
     private VBox detailsBox;
@@ -82,7 +88,17 @@ public class Address {
     public String getScanType(){return this.scanType;}
 
     public String getTesterUsername(){return this.testerUsername;}
-    public void setTesterUsername(String username){this.testerUsername = username;}
+    public void setTesterUsername(String username){
+        this.testerUsername = username;
+
+        if(!username.isBlank()){
+            //if(this.startChatButton != null)
+                this.startChatButton.setDisable(false);
+
+            //if(this.userInfoButton != null)
+                this.userInfoButton.setDisable(false);
+        }
+    }
 
     public Address(String ip, String name, String scanType, String clientUsername,
                    int addressId, boolean areScansComplete, boolean isAutomaticScanComplete, boolean isManualScanComplete) {
@@ -181,6 +197,52 @@ public class Address {
             });
         }
 
+        if(Client.getInstance().getRole().equals("Client") && !this.getScanType().equals("Automatic")){
+            this.userInfoButton = new JFXButton("User Info");
+            this.startChatButton = new JFXButton("Start chat");
+
+            FontAwesomeIconView infoIcon = new FontAwesomeIconView();
+            infoIcon.setGlyphName("INFO");
+            infoIcon.setGlyphSize(20);
+
+            if(this.testerUsername.isBlank()){
+                this.userInfoButton.setDisable(true);
+                this.startChatButton.setDisable(true);
+            }
+
+            userInfoButton.setGraphic(infoIcon);
+
+            userInfoButton.setOnAction(event ->{
+                try{
+                    FXMLLoader fxmlLoader = new FXMLLoader();
+                    fxmlLoader.setLocation(Main.class.getResource("user_info.fxml"));
+
+                    DialogPane newAddressPane = fxmlLoader.load();
+                    UserInfoController controller = fxmlLoader.getController();
+
+                    String userInfo = Client.getInstance().getUserInfo(this.testerUsername);
+
+                    if(!userInfo.contains("Error")){
+                        controller.setMessage(userInfo);
+
+                        Dialog<ButtonType> dialog = new Dialog<>();
+                        dialog.setDialogPane(newAddressPane);
+                        dialog.setTitle("User information");
+
+                        dialog.showAndWait();
+                    }
+                }catch (Exception e){
+                    System.out.println("Exception: " + e.getMessage());
+                }
+            });
+
+
+            //TODO: finish start chat method
+//            startChatButton.setOnAction(event -> {
+//
+//            }
+        }
+
         vBox.setSpacing(5);
         vBox.setPadding(new Insets(5));
 
@@ -227,6 +289,11 @@ public class Address {
 
             vBox.getChildren().add(this.deleteButton);
 
+            if(Client.getInstance().getRole().equals("Client") && !this.getScanType().equals("Automatic")){
+                vBox.getChildren().add(this.userInfoButton);
+                vBox.getChildren().add(this.startChatButton);
+            }
+
             this.isExtended = true;
         }
     }
@@ -241,5 +308,9 @@ public class Address {
 
             this.isExtended = false;
         }
+    }
+
+    public boolean isExtended(){
+        return this.isExtended;
     }
 }

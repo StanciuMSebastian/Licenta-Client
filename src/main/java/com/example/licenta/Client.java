@@ -50,6 +50,51 @@ public class Client {
         return isConnected;
     }
 
+    public boolean checkForUpdates(){
+        try{
+
+            int addressCount = MainController.getDoneAddressList();
+
+            output.writeUTF("Address Update");
+            output.writeInt(addressCount);
+
+            String response = input.readUTF();
+
+            // Return true if you need an update, false if not
+
+            return !response.equals("ok");
+
+        }catch(Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public String getUserInfo(String userName){
+        try{
+            output.writeUTF("User info");
+            output.writeUTF(userName);
+            output.writeInt(this.getID());
+
+            String response = input.readUTF();
+
+            if(response.contains("Error")){
+                Alert alert = new Alert(Alert.AlertType.ERROR, "", ButtonType.OK);
+                alert.setHeaderText(response);
+                alert.setTitle("ERROR");
+                alert.showAndWait();
+            }
+
+            return response;
+        }catch(Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
     public Map<Address, String> getUntestedAddresses(){
         Map<Address, String> retMap = new HashMap<>();
 

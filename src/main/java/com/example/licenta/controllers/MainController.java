@@ -3,8 +3,10 @@ package com.example.licenta.controllers;
 import com.example.licenta.Address;
 import com.example.licenta.Client;
 import com.example.licenta.Main;
+import com.example.licenta.UpdateAddressListener;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -47,6 +49,17 @@ public class MainController implements Initializable {
 
     static private ObservableList<Address> addressList;
 
+    static public int getDoneAddressList(){
+        int counter = 0;
+
+        for(Address a : addressList){
+            if(a.isAutomaticScanComplete() || a.isManualScanComplete())
+                counter++;
+        }
+
+        return  counter;
+    }
+
     @FXML
     private void minimize(ActionEvent event){
         Stage stage = (Stage) rootPane.getScene().getWindow();
@@ -86,8 +99,6 @@ public class MainController implements Initializable {
                             alert.showAndWait();
                         }else{
                             newAddress.setAddressId(Integer.parseInt(response.split(" ")[1]));
-
-                            //TODO: add progress bar for address automatic scanner
 
                             Alert alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setHeaderText("Your address has been added");
@@ -171,15 +182,38 @@ public class MainController implements Initializable {
         updateAddressList();
     }
     static public void updateAddressList(){
-        Client.getInstance().initAddresses();
 
-        addressList.removeAll(addressList);
-        addressList.addAll(Client.getInstance().getAddresses());
+        if(Client.getInstance().checkForUpdates()){
+            Client.getInstance().initAddresses();
+
+            int extendedAddressIndex = -1;
+
+            for(Address a : addressList)
+            {
+                if(a.isExtended()){
+                    extendedAddressIndex = addressList.indexOf(a);
+                    break;
+                }
+            }
+
+            addressList.removeAll(addressList);
+            addressList.addAll(Client.getInstance().getAddresses());
+
+            if(extendedAddressIndex != -1)
+                addressList.get(extendedAddressIndex).extend();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Your addresses have been updated");
+            alert.showAndWait();
+        }
     }
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        UpdateAddressListener updateListener = new UpdateAddressListener();
+        updateListener.start();
+
         addressList = FXCollections.observableArrayList();
 
         addressListView.setCellFactory(param -> new ItemCell());
