@@ -1,27 +1,30 @@
 package com.example.licenta.controllers;
 
-import com.example.licenta.Address;
-import com.example.licenta.Client;
-import com.example.licenta.Main;
-import com.example.licenta.UpdateAddressListener;
+import com.example.licenta.*;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import org.json.*;
@@ -29,10 +32,7 @@ import org.json.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.*;
 
 public class MainController implements Initializable {
     @FXML
@@ -45,9 +45,14 @@ public class MainController implements Initializable {
     private Button scan_button, newAddressButton, refreshButton;
     @FXML
     private ListView<Address> addressListView;
+
+    @FXML
+    private VBox itemHolder;
     private TextField addressText, addressTextField, nameTextField, newAddressNameField, newAddressIpField;
 
     static private ObservableList<Address> addressList;
+
+    UpdateAddressListener updateListener;
 
     static public int getDoneAddressList(){
         int counter = 0;
@@ -69,6 +74,7 @@ public class MainController implements Initializable {
 
     private boolean loadNewAddressDialog(String resourceName, String dialogTitle){
         try {
+            Client.getInstance().switchBlockedStatus();
             // Load the dialog pane
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(Main.class.getResource(resourceName));
@@ -100,18 +106,19 @@ public class MainController implements Initializable {
                         }else{
                             newAddress.setAddressId(Integer.parseInt(response.split(" ")[1]));
 
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setHeaderText("Your address has been added");
-                            alert.showAndWait();
+                            if(!newAddress.getScanType().equals("Manual")){
+                                this.showProgressBar();
+                                updateAddressList(false);
+                            }else{
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setHeaderText("Your address has been added");
+                                alert.showAndWait();
+                            }
                         }
                         addressList.add(newAddress);
-                    } else if (response.equals("Invalid Ip")) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setHeaderText("The address you inserted is invalid");
-                        alert.showAndWait();
                     }else{
                         Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setHeaderText("An error has occurred");
+                        alert.setHeaderText("Error: " + response);
                         alert.showAndWait();
                     }
                 }
@@ -120,18 +127,17 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
 
+        Client.getInstance().switchBlockedStatus();
+
         return false;
     }
     @FXML
     private void clickAddAddress(ActionEvent event){
        if(Client.getInstance().getRole().equals("Client")){
-           if(loadNewAddressDialog("address-editor.fxml", "Add new address")){
-           }
+           loadNewAddressDialog("address-editor.fxml", "Add new address");
        }
        else if (Client.getInstance().getRole().equals("Tester")){
-           if(loadNewAddressDialog("tester-address-list.fxml", "Select an address to scan")){
-
-           }
+           loadNewAddressDialog("tester-address-list.fxml", "Select an address to scan");
        }
     }
 
@@ -146,6 +152,7 @@ public class MainController implements Initializable {
     private void logOut(ActionEvent event) throws IOException, InterruptedException {
         fadeOut();
 
+        this.updateListener.interrupt();
         Client.getInstance().logOut();
     }
 
@@ -179,39 +186,68 @@ public class MainController implements Initializable {
 
     @FXML
     public void updateAddressList(ActionEvent event){
-        updateAddressList();
+        updateAddressList(true);
     }
-    static public void updateAddressList(){
+    static public void updateAddressList(boolean showAlert){
 
-        if(Client.getInstance().checkForUpdates()){
-            Client.getInstance().initAddresses();
+        Client.getInstance().initAddresses();
 
-            int extendedAddressIndex = -1;
+        int extendedAddressIndex = -1;
 
-            for(Address a : addressList)
-            {
-                if(a.isExtended()){
-                    extendedAddressIndex = addressList.indexOf(a);
-                    break;
-                }
-            }
+        for(Address a : addressList)
+        {
+            a.retract();
+//            if(a.isExtended()){
+//                extendedAddressIndex = addressList.indexOf(a);
+//                break;
+//            }
+        }
 
-            addressList.removeAll(addressList);
-            addressList.addAll(Client.getInstance().getAddresses());
+        addressList.removeAll(addressList);
+        addressList.addAll(Client.getInstance().getAddresses());
 
-            if(extendedAddressIndex != -1)
-                addressList.get(extendedAddressIndex).extend();
+        if(extendedAddressIndex != -1)
+            addressList.get(extendedAddressIndex).extend();
 
+        if(showAlert){
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Your addresses have been updated");
             alert.showAndWait();
         }
     }
 
+    public void showProgressBar(){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(Main.class.getResource("ScanProgressBar.fxml"));
+
+            Parent progressBarRoot = fxmlLoader.load();
+            ScanProgressBarController controller = fxmlLoader.getController();
+
+            Stage progressBarStage = new Stage();
+            progressBarStage.initModality(Modality.APPLICATION_MODAL);
+            progressBarStage.initStyle(StageStyle.UNDECORATED);
+            progressBarStage.setScene(new Scene(progressBarRoot));
+
+            Stage mainWindowStage = (Stage) rootPane.getScene().getWindow();
+            rootPane.setDisable(true);
+
+            Thread secondaryThread = new Thread(controller::begin);
+            secondaryThread.start();
+            progressBarStage.showAndWait();
+            //Client.getInstance().showScanProgress(controller);
+
+            rootPane.setDisable(false);
+
+        }catch (Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        UpdateAddressListener updateListener = new UpdateAddressListener();
+        updateListener = new UpdateAddressListener();
         updateListener.start();
 
         addressList = FXCollections.observableArrayList();
@@ -224,7 +260,7 @@ public class MainController implements Initializable {
                 Address selectedItem = addressListView.getSelectionModel().getSelectedItem();
 
                 for(Address a : addressListView.getItems()){
-                    if(a == selectedItem)
+                    if(a.equals(selectedItem))
                         a.extend();
                     else
                         a.retract();
@@ -286,6 +322,7 @@ public class MainController implements Initializable {
     public MainController(){
 
     }
+
 
     private class ItemCell extends ListCell<Address> {
         private Address address;

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.controlsfx.control.Rating?>
+
+<AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="329.0" prefWidth="600.0" style="-fx-background-color: #8141ff;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.licenta.controllers.AddressListItemController">
+   <children>
+      <Label fx:id="addressNameLabel" layoutX="25.0" layoutY="14.0" prefHeight="30.0" prefWidth="550.0" text="Address Name" />
+      <HBox fx:id="extendedBox" layoutX="14.0" layoutY="50.0" prefHeight="281.0" prefWidth="590.0">
+         <children>
+            <VBox fx:id="labelBox" alignment="TOP_CENTER" prefHeight="196.0" prefWidth="240.0" spacing="10.0">
+               <children>
+                  <Label fx:id="ipLabel" prefHeight="40.0" prefWidth="220.0" text="Address Ip" />
+                  <Label fx:id="scanTypeLabel" alignment="TOP_LEFT" prefHeight="40.0" prefWidth="220.0" text="Scan type" />
+                  <Label fx:id="testerInfoLabel" alignment="TOP_LEFT" prefHeight="40.0" prefWidth="220.0" text="Tester Info" />
+                  <Label fx:id="scanStatusLabel" alignment="TOP_LEFT" prefHeight="60.0" prefWidth="220.0" text="Scan Status" />
+               </children>
+            </VBox>
+            <VBox fx:id="buttonBox" alignment="TOP_CENTER" prefHeight="196.0" prefWidth="347.0" spacing="10.0">
+               <children>
+                  <Button fx:id="downloadButton" mnemonicParsing="false" style="-fx-background-color: black;" text="Download" textFill="WHITE" />
+                  <Button fx:id="deleteButton" mnemonicParsing="false" style="-fx-background-color: black;" text="Delete" textFill="WHITE" />
+                  <Rating fx:id="testerRating" rating="5.0" updateOnHover="true" />
+                  <Button fx:id="testerInfoButton" mnemonicParsing="false" style="-fx-background-color: black;" text="Tester Info" textFill="WHITE" />
+                  <Button fx:id="startChatButton" mnemonicParsing="false" style="-fx-background-color: black;" text="Start Chat" textFill="WHITE" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

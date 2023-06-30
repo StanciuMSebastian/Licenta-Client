@@ -7,6 +7,7 @@ module com.example.licenta {
     requires org.json;
     requires de.jensd.fx.glyphs.fontawesome;
     requires com.jfoenix;
+    requires org.controlsfx.controls;
 
 
     opens com.example.licenta to javafx.fxml;

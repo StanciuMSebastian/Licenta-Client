@@ -1,9 +1,8 @@
 package com.example.licenta;
 
 import com.example.licenta.controllers.MainController;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import com.example.licenta.controllers.ScanProgressBarController;
+import com.example.licenta.controllers.ScanProgressWindow;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
@@ -26,6 +25,12 @@ public class Client {
     private DataInputStream input;
     private boolean isConnected;
     private Vector<Address> addresses;
+
+    boolean isBlocked = false;
+
+    public boolean isBlocked(){
+        return this.isBlocked;
+    }
 
     public DataOutputStream getOutput() {
         return output;
@@ -50,6 +55,10 @@ public class Client {
         return isConnected;
     }
 
+    public void switchBlockedStatus(){
+        this.isBlocked = !this.isBlocked;
+    }
+
     public boolean checkForUpdates(){
         try{
 
@@ -69,6 +78,31 @@ public class Client {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public void giveRating(double rating, int addressId){
+        try{
+            output.writeUTF("Give User Rating");
+            output.writeInt(addressId);
+            output.writeDouble(rating);
+
+            String response = input.readUTF();
+
+            if(!response.equals("ok")){
+                Alert alert = new Alert(Alert.AlertType.ERROR, "", ButtonType.OK);
+                alert.setHeaderText(response);
+                alert.setTitle("ERROR");
+                alert.showAndWait();
+            }else{
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.OK);
+                alert.setHeaderText(response);
+                alert.setTitle("Your rating has been sent");
+                alert.showAndWait();
+            }
+        }catch(Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
     }
 
     public String getUserInfo(String userName){
@@ -147,6 +181,7 @@ public class Client {
                 String scanType = input.readUTF();
                 String clientUsername = input.readUTF();
                 int addressId = input.readInt();
+                double rating = input.readDouble();
                 boolean areScansComplete = input.readBoolean();
                 boolean isAutomaticScanComplete = input.readBoolean();
                 boolean isManualScanComplete = input.readBoolean();
@@ -154,6 +189,7 @@ public class Client {
                 Address newAddress = new Address(addressIp, addressName, scanType, clientUsername, addressId,
                         areScansComplete, isAutomaticScanComplete, isManualScanComplete);
 
+                newAddress.setRating(rating);
 
                 String testerUsername = input.readUTF();
                 newAddress.setTesterUsername(testerUsername);
@@ -281,6 +317,7 @@ public class Client {
                 output.writeUTF(newAddress.getName());
                 output.writeUTF(newAddress.getIp());
                 output.writeUTF(newAddress.getScanType());
+                output.writeBoolean(newAddress.isHasActiveScan());
             }else if(this.role.equals("Tester")){
                 output.writeInt(newAddress.getAddressId());
             }
@@ -296,19 +333,22 @@ public class Client {
 
     public String deleteAddress(Address address){
         try{
+            output.flush();
+
+            this.isBlocked =  true;
+
             output.writeUTF("Delete address");
             output.writeInt(this.ID);
             output.writeInt(address.getAddressId());
-            output.writeUTF(address.getIp());
-            output.writeUTF(address.getName());
 
             String response = input.readUTF();
 
-            if(response.equals("Your address was deleted")){
+            if(response.equals("ok")){
                 this.addresses.remove(address);
-                MainController.updateAddressList();
+                MainController.updateAddressList(false);
             }
 
+            this.isBlocked =  false;
             return response;
 
         }catch(Exception e){
@@ -320,7 +360,10 @@ public class Client {
 
     public void download(Address address, String reportType){
         try{
+            this.isBlocked =  true;
+
             output.writeUTF("Download report");
+            output.flush();
 
             output.writeInt(this.ID);
             output.writeInt(address.getAddressId());
@@ -370,10 +413,14 @@ public class Client {
             System.out.println("Exception: " + e);
             e.printStackTrace();
         }
+
+        this.isBlocked =  false;
     }
 
     public String upload(Address address, File file){
         try{
+            this.isBlocked = true;
+
             FileInputStream fStream = new FileInputStream(file);
 
 
@@ -391,6 +438,7 @@ public class Client {
                 Alert alert = new Alert(Alert.AlertType.ERROR, response, ButtonType.OK);
                 alert.showAndWait();
 
+                this.isBlocked = false;
                 return response;
             }
 
@@ -410,6 +458,7 @@ public class Client {
         }
 
 
+        this.isBlocked = false;
         return null;
     }
 
@@ -431,6 +480,4 @@ public class Client {
 
         return isConnected;
     }
-
-
 }

@@ -20,10 +20,15 @@ public class AddressEditorController implements Initializable, AddAddressInterfa
     private Label descriptionLabel;
     @FXML
     private DialogPane dialogPane;
+    @FXML
+    private CheckBox activeScanCheckbox;
+    private boolean hasShownWarning = false;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ButtonType okButtonType = dialogPane.getButtonTypes().get(1);
+
+        activeScanCheckbox.setDisable(true);
 
         Button okButton = (Button) dialogPane.lookupButton(okButtonType);
 
@@ -52,19 +57,43 @@ public class AddressEditorController implements Initializable, AddAddressInterfa
                 String description = "";
 
                 switch(newValue.toString()){
-                    case "Automatic" -> description = "Your web application will be scanned automatically by our server";
-                    case "Manual" -> description = "Your web application will be scanned by another user";
-                    case "Hybrid" -> description = "Your web application will be scanned first by our server, then by another user";
+                    case "Automatic" -> {
+                        description = "Your web application will be scanned automatically by our server";
+                        activeScanCheckbox.setDisable(false);
+                    }
+                    case "Manual" -> {
+                        description = "Your web application will be scanned by another user";
+                        activeScanCheckbox.setDisable(true);
+                    }
+                    case "Hybrid" -> {
+                        description = "Your web application will be scanned first by our server, then by another user";
+                        activeScanCheckbox.setDisable(false);
+                    }
                 }
 
+
+
                 descriptionLabel.setText(description);
+            }
+        });
+
+        activeScanCheckbox.setOnAction(event ->{
+            if(activeScanCheckbox.isSelected()){
+                if(!this.hasShownWarning){
+                    hasShownWarning = true;
+
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setHeaderText("You have checked active scan mode");
+                    alert.setContentText("Active scanning an web app involves simulating a real attack on the target, thus taking it longer to finnish and giving a more in-depth look about the present vulnerabilities.");
+                    alert.showAndWait();
+                }
             }
         });
     }
 
     @Override
     public Address getAddress() {
-        return new Address(newAddressIpField.getText(),
+        Address newAddress = new Address(newAddressIpField.getText(),
                 newAddressNameField.getText(),
                 scanModeComboBox.getValue().toString(),
                 Client.getInstance().getUsername(),
@@ -72,5 +101,9 @@ public class AddressEditorController implements Initializable, AddAddressInterfa
                 false,
                 false,
                 false);
+
+        newAddress.setHasActiveScan(this.activeScanCheckbox.isSelected());
+
+        return newAddress;
     }
 }

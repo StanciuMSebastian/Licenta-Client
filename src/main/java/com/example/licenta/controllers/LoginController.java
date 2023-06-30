@@ -8,13 +8,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.stage.Stage;
@@ -27,7 +27,6 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 public class LoginController implements Initializable {
-
     @FXML
     private BorderPane rootPane;
     @FXML
@@ -84,31 +83,34 @@ public class LoginController implements Initializable {
 
             Pattern pattern = Pattern.compile(emailRegex);
 
-            if(username.equals(""))
-                response = "Please fill the username box";
-
-            if(email.equals(""))
-                response = "Please fill the email box";
-
-            if(password.equals(""))
-                response = "Please fill the password box";
+            if(!confirmPassword.equals(password))
+                response = "The passwords don't match";
 
             if(confirmPassword.equals(""))
                 response = "Please fill the confirm password box";
 
-            if(!confirmPassword.equals(password))
-                response = "The passwords don't match";
-
             if(password.length() < 6)
                 response = "The password must be at least 6 characters long";
 
+            if(password.equals(""))
+                response = "Please fill the password box";
+
+            if(username.equals(""))
+                response = "Please fill the username box";
+
             if(!pattern.matcher(email).matches())
                 response = "Invalid email";
+
+            if(email.equals(""))
+                response = "Please fill the email box";
 
             if(!response.equals("ok")){
                 alert.setContentText(response);
                 alert.showAndWait();
             }else{
+                if(role.equals("Client") && !acceptConditions())
+                    return;
+
                 response = Client.getInstance().register(username, email, role, password);
 
                 if(!response.contains("Accept")){
@@ -134,14 +136,15 @@ public class LoginController implements Initializable {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("ALARM");
 
-            if(username.equals(""))
-                response = "Please fill the username box";
+            if(password.length() < 6)
+                response = "The password must be at least 6 characters long";
 
             if(password.equals(""))
                 response = "Please fill the password box";
 
-            if(password.length() < 6)
-                response = "The password must be at least 6 characters long";
+            if(username.equals(""))
+                response = "Please fill the username box";
+
 
             if(!response.equals("ok")){
                 alert.setContentText(response);
@@ -160,6 +163,36 @@ public class LoginController implements Initializable {
             System.out.println("Exception " + e);
             e.printStackTrace();
         }
+    }
+
+    private boolean acceptConditions(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Terms and Conditions");
+        alert.setHeaderText("Please read and accept the terms and conditions:");
+        // alert.setContentText("Please read and accept the terms and conditions:");
+
+        Label contentLabel = new Label("By accepting our terms and condition you agree to not " +
+                "use the platform with malicious intent such as uploading a large number of address " +
+                "entries or uploading the address of web applications without the application owner's permission");
+        contentLabel.setWrapText(true);
+        CheckBox checkBox = new CheckBox("I accept the terms and conditions");
+        VBox content = new VBox(10);
+        content.setPrefWidth(400);
+        content.getChildren().addAll(contentLabel, checkBox);
+        alert.getDialogPane().setContent(content);
+
+        ButtonType buttonOk = ButtonType.OK;
+        ButtonType buttonCancel = ButtonType.CANCEL;
+        alert.getButtonTypes().setAll(buttonOk, buttonCancel);
+
+        alert.getDialogPane().lookupButton(buttonOk).setDisable(true);
+        checkBox.setOnAction(event -> {
+            alert.getDialogPane().lookupButton(buttonOk).setDisable(!checkBox.isSelected());
+        });
+
+        return alert.showAndWait()
+                .filter(buttonType -> buttonType == buttonOk)
+                .isPresent();
     }
 
     @FXML
@@ -204,6 +237,7 @@ public class LoginController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         this.loginPane.setVisible(true);
         this.registerPane.setVisible(false);
 

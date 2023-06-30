@@ -18,14 +18,5 @@ public class UserInfoController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try{
-            while(true){
-                System.out.println("Scanning. . . ");
-                Thread.sleep(100000);
-            }
-        }catch(Exception e){
-            System.out.println("Exception: " + e);
-            e.printStackTrace();
-        }
     }
 }

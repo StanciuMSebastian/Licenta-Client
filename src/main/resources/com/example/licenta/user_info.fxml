@@ -9,7 +9,7 @@
    <content>
       <AnchorPane prefHeight="164.0" prefWidth="412.0">
          <children>
-            <Label fx:id="userInfoLabel" alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="55.0" prefWidth="376.0" text="Info" wrapText="true" />
+            <Label fx:id="userInfoLabel" alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="110.0" prefWidth="376.0" text="Info" wrapText="true" />
          </children>
       </AnchorPane>
    </content>

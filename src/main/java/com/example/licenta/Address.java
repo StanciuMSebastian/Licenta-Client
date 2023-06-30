@@ -17,6 +17,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.Rating;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -26,15 +27,24 @@ import java.util.Objects;
 public class Address {
     private String ip, name, scanType, testerUsername, clientUsername;
     private int addressId;
-    private boolean areScansComplete, isAutomaticScanComplete, isManualScanComplete, isExtended;
+    private double rating;
+    private boolean areScansComplete, isAutomaticScanComplete, isManualScanComplete, isExtended, hasActiveScan;
 
     private JFXButton deleteButton, downloadButton, uploadButton, userInfoButton, startChatButton;
     private Label addressName, addressFeaturesLabel;
     private VBox vBox;
+    private Rating testerRating;
     private VBox detailsBox;
     private HBox hBox;
-
     private Line separator;
+
+
+    public double getRating(){
+        return this.rating;
+    }
+    public void setRating(double rating){
+        this.rating = rating;
+    }
 
     public boolean areScansComplete(){
         return this.areScansComplete;
@@ -48,12 +58,21 @@ public class Address {
         return this.isManualScanComplete;
     }
 
+    public boolean isHasActiveScan() {
+        return hasActiveScan;
+    }
+
+    public void setHasActiveScan(boolean hasActiveScan) {
+        this.hasActiveScan = hasActiveScan;
+    }
+
     public void doneAutomaticScan(){
         this.isAutomaticScanComplete = true;
 
         if(this.scanType.equals("Automatic") || this.isManualScanComplete)
             this.areScansComplete = true;
     }
+
 
     public void doneManualScan(){
         this.isManualScanComplete = true;
@@ -88,20 +107,46 @@ public class Address {
     public String getScanType(){return this.scanType;}
 
     public String getTesterUsername(){return this.testerUsername;}
+
+    public boolean isExtended(){
+        return this.isExtended;
+    }
     public void setTesterUsername(String username){
         this.testerUsername = username;
 
         if(!username.isBlank()){
-            //if(this.startChatButton != null)
-                this.startChatButton.setDisable(false);
+            this.startChatButton.setDisable(false);
+            this.userInfoButton.setDisable(false);
 
-            //if(this.userInfoButton != null)
-                this.userInfoButton.setDisable(false);
+            this.testerRating = initRating();
         }
+    }
+
+    private Rating initRating(){
+        Rating newRating = new Rating(5, 5);
+        newRating.setUpdateOnHover(true);
+
+        newRating.setOnMouseClicked(event ->{
+            this.rating = newRating.getRating();
+
+            Client.getInstance().giveRating(newRating.getRating(), this.addressId);
+
+            newRating.setDisable(true);
+            newRating.setRating(this.rating);
+        });
+
+        if(this.rating != -1){
+            newRating.setDisable(true);
+            newRating.setRating(this.rating);
+        }
+
+
+        return newRating;
     }
 
     public Address(String ip, String name, String scanType, String clientUsername,
                    int addressId, boolean areScansComplete, boolean isAutomaticScanComplete, boolean isManualScanComplete) {
+        this.hasActiveScan = false;
         this.testerUsername = "";
         this.areScansComplete = areScansComplete;
         this.isAutomaticScanComplete = isAutomaticScanComplete;
@@ -113,6 +158,8 @@ public class Address {
         this.addressId = addressId;
         this.downloadButton = new JFXButton("Download");
         this.deleteButton = new JFXButton("Delete");
+        this.userInfoButton = new JFXButton("User Info");
+        this.startChatButton = new JFXButton("Start chat");
         this.addressName = new Label(name);
         this.addressFeaturesLabel = new Label();
 
@@ -165,6 +212,7 @@ public class Address {
             alert.showAndWait();
 
             if (alert.getResult() == ButtonType.YES) {
+                this.retract();
                 Client.getInstance().deleteAddress(this);
             }
         });
@@ -198,8 +246,7 @@ public class Address {
         }
 
         if(Client.getInstance().getRole().equals("Client") && !this.getScanType().equals("Automatic")){
-            this.userInfoButton = new JFXButton("User Info");
-            this.startChatButton = new JFXButton("Start chat");
+
 
             FontAwesomeIconView infoIcon = new FontAwesomeIconView();
             infoIcon.setGlyphName("INFO");
@@ -208,6 +255,8 @@ public class Address {
             if(this.testerUsername.isBlank()){
                 this.userInfoButton.setDisable(true);
                 this.startChatButton.setDisable(true);
+            }else{
+                testerRating = initRating();
             }
 
             userInfoButton.setGraphic(infoIcon);
@@ -256,27 +305,31 @@ public class Address {
         return "Name: " + this.name + "\nIP: " + this.ip + "\nScantype: " + this.scanType + "\nClientId: ";
     }
 
+    private void rewriteAddressFeatures(){
+        String addressFeaturesString = "\nAddress IP: " + this.ip + "\nScan Type: " + this.scanType;
+
+        if(Client.getInstance().getRole().equals("Client")){
+            if(!this.testerUsername.equals("")){
+                addressFeaturesString += "\nAssigend to tester: " + this.testerUsername;
+            }else if(!this.scanType.equals("Automatic")){
+                addressFeaturesString += "\nNo tester assigned";
+            }
+        }else if(Client.getInstance().getRole().equals("Tester")){
+            addressFeaturesString += "\nClient name: " + this.clientUsername;
+        }
+
+        if(this.areScansComplete){
+            addressFeaturesString += "\nScanned\n\n";
+        }else{
+            addressFeaturesString += "\nNot Scanned\n\n";
+        }
+
+        addressFeaturesLabel.setText(addressFeaturesString);
+    }
+
     public void extend(){
         if(!this.isExtended){
-            String addressFeaturesString = "\nAddress IP: " + this.ip + "\nScan Type: " + this.scanType;
-
-            if(Client.getInstance().getRole().equals("Client")){
-                if(!this.testerUsername.equals("")){
-                    addressFeaturesString += "\nAssigend to tester: " + this.testerUsername;
-                }else if(!this.scanType.equals("Automatic")){
-                    addressFeaturesString += "\nNo tester assigned";
-                }
-            }else if(Client.getInstance().getRole().equals("Tester")){
-                addressFeaturesString += "\nClient name: " + this.clientUsername;
-            }
-
-            if(this.areScansComplete){
-                addressFeaturesString += "\nScanned\n\n";
-            }else{
-                addressFeaturesString += "\nNot Scanned\n\n";
-            }
-
-            addressFeaturesLabel.setText(addressFeaturesString);
+            rewriteAddressFeatures();
             //vBox.getChildren().addAll(hBox);
             this.addressName.setTextFill(Color.WHITE);
             vBox.getChildren().add(this.addressFeaturesLabel);
@@ -290,6 +343,9 @@ public class Address {
             vBox.getChildren().add(this.deleteButton);
 
             if(Client.getInstance().getRole().equals("Client") && !this.getScanType().equals("Automatic")){
+                if(this.testerRating != null)
+                    vBox.getChildren().add(testerRating);
+
                 vBox.getChildren().add(this.userInfoButton);
                 vBox.getChildren().add(this.startChatButton);
             }
@@ -310,7 +366,5 @@ public class Address {
         }
     }
 
-    public boolean isExtended(){
-        return this.isExtended;
-    }
+
 }

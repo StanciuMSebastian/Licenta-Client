@@ -25,7 +25,7 @@
            </Text>
            <Button fx:id="newAddressButton" contentDisplay="RIGHT" layoutX="74.0" layoutY="362.0" mnemonicParsing="false" onAction="#clickAddAddress" prefHeight="36.0" prefWidth="151.0" style="-fx-background-color: BLACK;" text="New Address" textFill="WHITE" />
            <Button layoutX="117.0" layoutY="477.0" mnemonicParsing="false" onAction="#logOut" style="-fx-background-color: BLACK;" text="Log out" textFill="WHITE" />
-         <Button fx:id="refreshButton" layoutX="116.0" layoutY="423.0" mnemonicParsing="false" onAction="#updateAddressList" style="-fx-background-color: BLACK;" text="Refresh" textFill="WHITE" />
+           <Button fx:id="refreshButton" layoutX="116.0" layoutY="423.0" mnemonicParsing="false" onAction="#updateAddressList" style="-fx-background-color: BLACK;" text="Refresh" textFill="WHITE" />
        </AnchorPane>
    </left>
    <right>
@@ -48,7 +48,7 @@
             </Button>
             <AnchorPane layoutX="32.0" layoutY="64.0" prefHeight="412.0" prefWidth="599.0">
                <children>
-                  <ListView fx:id="addressListView" prefHeight="420.0" prefWidth="599.0" styleClass="custom-list-view" />
+                  <ListView fx:id="addressListView" prefHeight="420.0" prefWidth="600.0" styleClass="custom-list-view" />
                </children>
             </AnchorPane>
          </children></Pane>

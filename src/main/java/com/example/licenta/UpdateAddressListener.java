@@ -15,8 +15,8 @@ public class UpdateAddressListener extends Thread{
         try{
             Thread.sleep(10000 );
             while(true){
-                if(Client.getInstance().checkForUpdates()){
-                    Platform.runLater(MainController::updateAddressList);
+                if(!Client.getInstance().isBlocked() && Client.getInstance().checkForUpdates()){
+                    Platform.runLater(() -> MainController.updateAddressList(true));
                 }
 
                 Thread.sleep(10000 );
@@ -26,6 +26,8 @@ public class UpdateAddressListener extends Thread{
             e.printStackTrace();
         }
     }
+
+
 
     public UpdateAddressListener(){
     }
