@@ -50,8 +50,6 @@ public class ScanProgressBarController implements Initializable {
                 message = input.readUTF();
                 progress = input.readInt();
             }
-
-            Thread.sleep(3000);
         }catch(Exception e){
             System.out.println("Exception: " + e);
             e.printStackTrace();

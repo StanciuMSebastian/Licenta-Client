@@ -1,10 +1,13 @@
 package com.example.licenta;
 
 import com.example.licenta.controllers.AddAddressInterface;
+import com.example.licenta.controllers.ChatBoxController;
+import com.example.licenta.controllers.RatingMessagePromptController;
 import com.example.licenta.controllers.UserInfoController;
 import com.jfoenix.controls.JFXButton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
@@ -23,6 +26,7 @@ import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Address {
     private String ip, name, scanType, testerUsername, clientUsername;
@@ -128,17 +132,40 @@ public class Address {
 
         newRating.setOnMouseClicked(event ->{
             this.rating = newRating.getRating();
+            String message = "";
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader();
+                fxmlLoader.setLocation(Main.class.getResource("rating-message-prompt.fxml"));
 
-            Client.getInstance().giveRating(newRating.getRating(), this.addressId);
+                DialogPane newAddressPane = fxmlLoader.load();
+                RatingMessagePromptController controller = fxmlLoader.getController();
 
-            newRating.setDisable(true);
-            newRating.setRating(this.rating);
+                Dialog<ButtonType> dialog = new Dialog<>();
+                dialog.setDialogPane(newAddressPane);
+
+                Optional<ButtonType> result = dialog.showAndWait();
+
+                if(result.isPresent() && result.get().getButtonData() == ButtonType.OK.getButtonData()){
+                    message = controller.getMessage();
+
+                    Client.getInstance().giveRating(newRating.getRating(), this.testerUsername, message);
+
+                    newRating.setDisable(true);
+                    newRating.setRating(this.rating);
+                }
+            }catch(Exception e ){
+                System.out.println("Exception: " + e);
+                e.printStackTrace();
+            }
         });
 
         if(this.rating != -1){
             newRating.setDisable(true);
             newRating.setRating(this.rating);
         }
+
+        if(!this.isManualScanComplete)
+            newRating.setDisable(false);
 
 
         return newRating;
@@ -203,7 +230,7 @@ public class Address {
             Client.getInstance().download(this, downloadChoice);
         });
 
-
+        startChatButton.setOnAction(this::startChat);
 
         deleteButton.setOnAction(event ->{
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.YES, ButtonType.NO);
@@ -223,6 +250,9 @@ public class Address {
         if(Client.getInstance().getRole().equals("Tester")){
             this.uploadButton = new JFXButton("Upload");
             FontAwesomeIconView uploadIcon = new FontAwesomeIconView();
+
+            if(this.isManualScanComplete)
+                uploadButton.setDisable(true);
 
             uploadIcon.setGlyphName("UPLOAD");
             uploadIcon.setGlyphSize(20);
@@ -286,10 +316,7 @@ public class Address {
             });
 
 
-            //TODO: finish start chat method
-//            startChatButton.setOnAction(event -> {
-//
-//            }
+
         }
 
         vBox.setSpacing(5);
@@ -299,6 +326,42 @@ public class Address {
         //detailsBox.setPadding(new Insets(5));
     }
 
+    private void startChat(ActionEvent event){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(Main.class.getResource("chat-box.fxml"));
+
+            AnchorPane chatRootPane = fxmlLoader.load();
+            ChatBoxController controller = fxmlLoader.getController();
+
+            controller.setAddressId(this.addressId);
+            if(Client.getInstance().getUsername().equals(this.testerUsername))
+                controller.setReceiverUsername(this.clientUsername);
+            else
+                controller.setReceiverUsername(this.testerUsername);
+
+            Client.getInstance().getMessages(controller);
+            ChatUpdateListener chatListener = new ChatUpdateListener(controller);
+            chatListener.start();
+
+            Scene chatScene = new Scene(chatRootPane);
+
+            Parent rootNode = this.vBox.getParent();
+
+            while(rootNode.getParent() != null)
+                rootNode = rootNode.getParent();
+
+            rootNode.setDisable(true);
+
+            Stage chatStage = new Stage();
+            chatStage.setScene(chatScene);
+            chatStage.showAndWait();
+
+            rootNode.setDisable(false);
+        }catch (Exception e){
+            System.out.println("Exception: " + e.getMessage());
+        }
+    }
 
     @Override
     public String toString(){
@@ -347,6 +410,10 @@ public class Address {
                     vBox.getChildren().add(testerRating);
 
                 vBox.getChildren().add(this.userInfoButton);
+                vBox.getChildren().add(this.startChatButton);
+            }
+
+            if(Client.getInstance().getRole().equals("Tester")){
                 vBox.getChildren().add(this.startChatButton);
             }
 

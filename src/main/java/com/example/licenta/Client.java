@@ -1,8 +1,10 @@
 package com.example.licenta;
 
+import com.example.licenta.controllers.ChatBoxController;
 import com.example.licenta.controllers.MainController;
 import com.example.licenta.controllers.ScanProgressBarController;
 import com.example.licenta.controllers.ScanProgressWindow;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
@@ -12,6 +14,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Client {
@@ -27,6 +31,16 @@ public class Client {
     private Vector<Address> addresses;
 
     boolean isBlocked = false;
+
+    private ChatBoxController chatController;
+
+    public void destroyChatController(){
+        this.chatController = null;
+    }
+
+    public ChatBoxController getChatController() {
+        return chatController;
+    }
 
     public boolean isBlocked(){
         return this.isBlocked;
@@ -59,6 +73,71 @@ public class Client {
         this.isBlocked = !this.isBlocked;
     }
 
+    public void getMessages(ChatBoxController controller){
+        try{
+            this.isBlocked = true;
+
+            this.chatController = controller;
+            controller.resetCounter() ;
+            output.writeUTF("Get messages");
+            output.writeInt(this.ID);
+            output.writeInt(controller.getAddressId());
+            output.writeUTF(controller.getReceiverUsername());
+
+            int messageCount = input.readInt();
+
+            for(int i = 0; i < messageCount; i++){
+                String senderUsername = input.readUTF();
+                String receiverUsername = input.readUTF();
+                String messageText = input.readUTF();
+                long longTimeStamp = input.readLong();
+
+                Date timestamp = new Date(longTimeStamp);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd hh:mm");
+                String formattedDate = dateFormat.format(timestamp);
+
+                if(senderUsername.equals(this.username))
+                    Platform.runLater(() ->{
+                        controller.sentMessage(messageText);
+                    });
+                else if(receiverUsername.equals(this.username))
+                    Platform.runLater(() ->{
+                        controller.receiveMessage(messageText);
+                    });
+            }
+        }catch(Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+
+        this.isBlocked = false;
+    }
+
+    public void sendMessage(String message, String receiverUsername, int addressId){
+        try{
+            this.isBlocked = true;
+
+            output.writeUTF("Send Message");
+            output.writeUTF(this.username);
+            output.writeUTF(receiverUsername);
+            output.writeUTF(message);
+            output.writeInt(addressId);
+
+            String response = input.readUTF();
+
+            if(!response.equals("ok")){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(response);
+                alert.showAndWait();
+            }
+        }catch(Exception e){
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+
+        this.isBlocked = false;
+    }
+
     public boolean checkForUpdates(){
         try{
 
@@ -80,11 +159,12 @@ public class Client {
         return false;
     }
 
-    public void giveRating(double rating, int addressId){
+    public void giveRating(double rating, String testerUsername, String message){
         try{
             output.writeUTF("Give User Rating");
-            output.writeInt(addressId);
+            output.writeUTF(testerUsername);
             output.writeDouble(rating);
+            output.writeUTF(message);
 
             String response = input.readUTF();
 
@@ -95,8 +175,7 @@ public class Client {
                 alert.showAndWait();
             }else{
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "", ButtonType.OK);
-                alert.setHeaderText(response);
-                alert.setTitle("Your rating has been sent");
+                alert.setContentText("Your rating has been sent");
                 alert.showAndWait();
             }
         }catch(Exception e){
@@ -449,8 +528,10 @@ public class Client {
 
             fStream.close();
 
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Your address was uploaded with success!", ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Your report was uploaded with success!", ButtonType.OK);
             alert.showAndWait();
+
+            MainController.updateAddressList(false);
 
         }catch(Exception e){
             System.out.println("Exception: " + e);
@@ -479,5 +560,27 @@ public class Client {
         }
 
         return isConnected;
+    }
+
+    public boolean checkForChatUpdates(ChatBoxController controller) {
+        try{
+            output.writeUTF("Check for chat updates");
+            output.writeInt(chatController.getMessageNumber());
+            output.writeInt(chatController.getAddressId());
+            output.writeUTF(chatController.getReceiverUsername());
+            output.writeUTF(this.username);
+
+            String response = input.readUTF();
+
+            if(response.equals("Update needed"))
+                return true;
+        }catch(Exception e){
+            this.isConnected = false;
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+        }
+
+
+        return false;
     }
 }

@@ -108,14 +108,15 @@ public class MainController implements Initializable {
 
                             if(!newAddress.getScanType().equals("Manual")){
                                 this.showProgressBar();
-                                updateAddressList(false);
                             }else{
                                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                 alert.setHeaderText("Your address has been added");
                                 alert.showAndWait();
                             }
                         }
-                        addressList.add(newAddress);
+                        Thread.sleep(1000);
+
+                        updateAddressList(false);
                     }else{
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setHeaderText("Error: " + response);
@@ -126,7 +127,6 @@ public class MainController implements Initializable {
             System.out.println("Exception " + e);
             e.printStackTrace();
         }
-
         Client.getInstance().switchBlockedStatus();
 
         return false;
@@ -197,10 +197,6 @@ public class MainController implements Initializable {
         for(Address a : addressList)
         {
             a.retract();
-//            if(a.isExtended()){
-//                extendedAddressIndex = addressList.indexOf(a);
-//                break;
-//            }
         }
 
         addressList.removeAll(addressList);
